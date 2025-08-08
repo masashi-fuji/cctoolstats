@@ -1,6 +1,6 @@
 {
   "name": "cctoolstats",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Claude Codeのツール呼び出し／サブエージェント実行履歴の統計を分かりやすく表示するCLIツール",
   "main": "dist/index.js",
   "bin": {
