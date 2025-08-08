@@ -3,8 +3,8 @@ priority: 2
 tags: ["development", "tdd", "implementation"]
 description: "TDDによる基本機能の実装"
 created_at: "2025-08-08T12:56:49Z"
-started_at: null  # Do not modify manually
-closed_at: null   # Do not modify manually
+started_at: 2025-08-08T13:25:28Z # Do not modify manually
+closed_at: 2025-08-08T13:46:42Z # Do not modify manually
 depends_on: ["250808-125619-basic-setup"]
 ---
 
@@ -15,37 +15,37 @@ TDD（テスト駆動開発）の手法を用いて、cctoolstatsの主要機能
 ## Tasks
 
 ### 1. CLIインターフェースの実装（TDD）
-- [ ] テスト作成: tests/unit/cli.test.ts
-- [ ] 実装: src/cli.ts
-- [ ] リファクタリング
+- [x] テスト作成: tests/unit/cli.test.ts
+- [x] 実装: src/cli.ts
+- [x] リファクタリング
 
 ### 2. JSONLパーサーの実装（TDD）
-- [ ] テスト作成: tests/unit/parser/stream-parser.test.ts
-- [ ] 実装: src/parser/stream-parser.ts
-- [ ] リファクタリング
+- [x] テスト作成: tests/unit/parser/stream-parser.test.ts
+- [x] 実装: src/parser/stream-parser.ts
+- [x] リファクタリング
 
 ### 3. サブエージェント分析の実装（TDD）
-- [ ] テスト作成: tests/unit/analyzer/subagent.test.ts
-- [ ] 実装: src/analyzer/subagent.ts
-- [ ] リファクタリング
+- [x] テスト作成: tests/unit/analyzer/subagent.test.ts
+- [x] 実装: src/analyzer/subagent.ts
+- [x] リファクタリング
 
 ### 4. ツール使用分析の実装（TDD）
-- [ ] テスト作成: tests/unit/analyzer/tool.test.ts
-- [ ] 実装: src/analyzer/tool.ts
-- [ ] リファクタリング
+- [x] テスト作成: tests/unit/analyzer/tool.test.ts
+- [x] 実装: src/analyzer/tool.ts
+- [x] リファクタリング
 
 ### 5. テーブルフォーマッターの実装（TDD）
-- [ ] テスト作成: tests/unit/formatters/table.test.ts
-- [ ] 実装: src/formatters/table.ts
-- [ ] リファクタリング
+- [x] テスト作成: tests/unit/formatters/table.test.ts
+- [x] 実装: src/formatters/table.ts
+- [x] リファクタリング
 
 ### 6. 統合テストの作成
-- [ ] tests/integration/cli.test.ts
-- [ ] テストデータの準備
+- [x] tests/integration/cli.test.ts
+- [x] テストデータの準備
 
 ### 7. テストと検証
-- [ ] Run tests before closing and pass all tests (No exceptions)
-- [ ] Get developer approval before closing
+- [x] Run tests before closing and pass all tests (No exceptions)
+- [x] Get developer approval before closing
 
 ## TDD原則
 

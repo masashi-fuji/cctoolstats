@@ -1,0 +1,10 @@
+{"type":"tool_invocation","tool":"Bash","timestamp":"2025-01-01T10:00:00Z","duration":150}
+{"type":"tool_invocation","tool":"Read","timestamp":"2025-01-01T10:01:00Z","duration":50}
+{"type":"subagent_invocation","agent":"code-reviewer","timestamp":"2025-01-01T10:02:00Z","sessionId":"session-1"}
+{"type":"tool_invocation","tool":"Write","timestamp":"2025-01-01T10:03:00Z","duration":200}
+{"type":"tool_invocation","tool":"Bash","timestamp":"2025-01-01T10:04:00Z","duration":100}
+{"type":"subagent_invocation","agent":"test-writer","timestamp":"2025-01-01T10:05:00Z","sessionId":"session-1"}
+{"type":"tool_invocation","tool":"Edit","timestamp":"2025-01-01T10:06:00Z","duration":75}
+{"type":"tool_invocation","tool":"Bash","timestamp":"2025-01-01T10:07:00Z","duration":125}
+{"type":"subagent_invocation","agent":"code-reviewer","timestamp":"2025-01-01T10:08:00Z","sessionId":"session-2"}
+{"type":"tool_invocation","tool":"Grep","timestamp":"2025-01-01T10:09:00Z","duration":30}

@@ -2,8 +2,119 @@
  * Subagent usage analyzer
  */
 
-import type { LogEntry } from '../parser/types.js'
+export interface SubagentAnalysisResult {
+  totalInvocations: number;
+  uniqueAgents: number;
+  agentCounts: Record<string, number>;
+  agentPercentages?: Record<string, number>;
+  timeline?: Array<{
+    agent: string;
+    timestamp: string;
+    index: number;
+  }>;
+}
 
+export interface TopAgent {
+  name: string;
+  count: number;
+  percentage: number;
+}
+
+export class SubagentAnalyzer {
+  /**
+   * Analyze subagent invocations from log entries
+   */
+  analyze(entries: any[]): SubagentAnalysisResult {
+    const agentCounts: Record<string, number> = {};
+    const timeline: Array<{ agent: string; timestamp: string; index: number }> = [];
+    let totalInvocations = 0;
+    
+    entries.forEach((entry, index) => {
+      if (entry.type === 'subagent_invocation' && entry.agent) {
+        const agent = entry.agent;
+        agentCounts[agent] = (agentCounts[agent] || 0) + 1;
+        totalInvocations++;
+        
+        if (entry.timestamp) {
+          timeline.push({
+            agent,
+            timestamp: entry.timestamp,
+            index: timeline.length
+          });
+        }
+      }
+    });
+    
+    const uniqueAgents = Object.keys(agentCounts).length;
+    
+    // Calculate percentages
+    const agentPercentages: Record<string, number> = {};
+    if (totalInvocations > 0) {
+      for (const [agent, count] of Object.entries(agentCounts)) {
+        const percentage = (count / totalInvocations) * 100;
+        agentPercentages[agent] = Math.round(percentage * 100) / 100;
+      }
+    }
+    
+    return {
+      totalInvocations,
+      uniqueAgents,
+      agentCounts,
+      agentPercentages,
+      timeline
+    };
+  }
+  
+  /**
+   * Get top N agents by invocation count
+   */
+  getTopAgents(result: SubagentAnalysisResult, limit: number): TopAgent[] {
+    const agents = Object.entries(result.agentCounts)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percentage: result.agentPercentages?.[name] || 0
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+    
+    return agents;
+  }
+  
+  /**
+   * Filter entries by time range
+   */
+  filterByTimeRange(entries: any[], startTime: string, endTime: string): any[] {
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    
+    return entries.filter(entry => {
+      if (!entry.timestamp) return false;
+      const timestamp = new Date(entry.timestamp).getTime();
+      return timestamp >= start && timestamp <= end;
+    });
+  }
+  
+  /**
+   * Group invocations by session
+   */
+  groupBySession(entries: any[]): Record<string, any[]> {
+    const sessions: Record<string, any[]> = {};
+    
+    entries.forEach(entry => {
+      if (entry.type === 'subagent_invocation' && entry.sessionId) {
+        if (!sessions[entry.sessionId]) {
+          sessions[entry.sessionId] = [];
+        }
+        sessions[entry.sessionId].push(entry);
+      }
+    });
+    
+    return sessions;
+  }
+}
+
+// Keep the old interface for backward compatibility
 export interface SubagentStats {
   name: string
   count: number
@@ -12,7 +123,15 @@ export interface SubagentStats {
   errors: number
 }
 
-export function analyzeSubagents(entries: LogEntry[]): SubagentStats[] {
-  // TODO: Implement subagent analysis logic
-  return []
+export function analyzeSubagents(entries: any[]): SubagentStats[] {
+  const analyzer = new SubagentAnalyzer();
+  const result = analyzer.analyze(entries);
+  
+  return Object.entries(result.agentCounts).map(([name, count]) => ({
+    name,
+    count,
+    successRate: 100, // Default for now
+    averageDuration: 0,
+    errors: 0
+  }));
 }
