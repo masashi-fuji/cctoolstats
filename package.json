@@ -1,0 +1,63 @@
+{
+  "name": "cctoolstats",
+  "version": "1.0.0",
+  "description": "Claude Codeのツール呼び出し／サブエージェント実行履歴の統計を分かりやすく表示するCLIツール",
+  "main": "dist/index.js",
+  "bin": {
+    "cctoolstats": "./bin/cctoolstats.js"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/masashi-fuji/cctoolstats.git"
+  },
+  "keywords": [
+    "claude",
+    "code",
+    "stats",
+    "cli",
+    "tools",
+    "analysis"
+  ],
+  "author": "Masashi Fuji",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/masashi-fuji/cctoolstats/issues"
+  },
+  "homepage": "https://github.com/masashi-fuji/cctoolstats#readme",
+  "dependencies": {
+    "chalk": "^5.5.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.0",
+    "ora": "^8.2.0",
+    "zod": "^4.0.15"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.5",
+    "@types/node": "^24.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "typescript-language-server": "^4.4.0",
+    "vitest": "^3.2.4"
+  }
+}

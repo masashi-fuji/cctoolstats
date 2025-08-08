@@ -73,3 +73,38 @@ Claude Codeのトランスクリプトログ (JSONL形式):
 2. アーキテクチャ設計は `docs/design/architecture.md` を参照
 3. 新旧両方のパス (`~/.claude/` と `~/.config/claude/`) に対応すること
 4. エラー処理とデータ欠損への耐性を考慮すること
+
+## lsmcp (TypeScript Language Server) 利用方針
+
+### 概要
+lsmcp (TypeScript Language Server) をMCPサーバーとして設定済み。コード補完、型チェック、リファクタリング支援に活用する。
+
+### 活用場面
+- TypeScriptコードの型エラー検出
+- インポート文の自動整理
+- リファクタリング（名前変更、関数抽出など）
+- コード補完候補の提案
+- 未使用コードの検出
+
+### 設定
+- プロジェクトローカルに設定済み (`.mcp.json`)
+- `npx typescript-language-server --stdio` で起動
+
+## TDD開発プロセス
+
+### 基本サイクル
+Kent Beck流のTDD手法を採用（Red → Green → Refactor）
+
+### 開発手順
+1. **Red**: 失敗するテストを最初に書く
+2. **Green**: テストを通す最小限のコードを実装
+3. **Refactor**: コードを整理・改善（テストは常にグリーン維持）
+
+### テストファイル配置
+- ユニットテスト: `tests/unit/`
+- 統合テスト: `tests/integration/`
+- フィクスチャ: `tests/fixtures/`
+
+### テスト実行
+- `npm test`: Vitestをwatch modeで実行
+- `npm run test:run`: 一度だけ実行（CI用）

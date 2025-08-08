@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "lsmcp": {
+      "type": "stdio",
+      "command": "npx typescript-language-server",
+      "args": [
+        "--stdio"
+      ],
+      "env": {}
+    }
+  }
+}

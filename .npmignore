@@ -1,0 +1,35 @@
+# Source files
+src/
+
+# Test files
+tests/
+*.test.ts
+*.spec.ts
+
+# Configuration
+.eslintrc.json
+.prettierrc
+tsconfig.json
+vitest.config.ts
+
+# Development files
+docs/
+tmp/
+*.log
+.env*
+
+# CI/CD
+.github/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Other
+current-ticket.md
+*.md
+!README.md
