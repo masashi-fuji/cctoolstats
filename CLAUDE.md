@@ -32,3 +32,44 @@ Use `./ticket.sh` for ticket management.
    - Check all tasks in checklist are completed (mark with `[x]`)
    - Get user approval before proceeding
 2. Complete: `./ticket.sh close`
+
+---
+
+# cctoolstats プロジェクト
+
+## プロジェクト概要
+
+**cctoolstats** - Claude Codeのツール呼び出し／サブエージェント実行履歴の統計を分かりやすく表示するCLIツール
+
+このプロジェクトは [ccusage](https://github.com/ryoppippi/ccusage) のリスペクトです。
+
+## 技術仕様
+
+- **使用言語**: TypeScript
+- **実行方法**: 
+  - `npx cctoolstats@latest` (インストール不要)
+  - `npm install -g cctoolstats` (グローバルインストール)
+
+## 主要機能
+
+1. **サブエージェント統計**: Claude Codeの各サブエージェントの使用回数を集計
+2. **ツール使用分析**: Bash, Read, Write, Edit等の各ツールの使用頻度を可視化
+3. **タイムライン表示**: セッション毎の実行履歴を時系列で表示
+
+## 参考実装
+
+Fish関数版の実装が以下にあります（起動オプションの設計参考用）:
+- `~/ghq/github.com/masashi-fuji/dotfiles/.config/fish/functions/claude-subagent-stats.fish`
+
+## データソース
+
+Claude Codeのトランスクリプトログ (JSONL形式):
+- `~/.claude/projects/*.jsonl`
+- `~/.config/claude/projects/*.jsonl` (v1.0.30以降)
+
+## 開発時の注意事項
+
+1. トランスクリプト解析の詳細は `docs/research/transcript-analysis.md` を参照
+2. アーキテクチャ設計は `docs/design/architecture.md` を参照
+3. 新旧両方のパス (`~/.claude/` と `~/.config/claude/`) に対応すること
+4. エラー処理とデータ欠損への耐性を考慮すること
