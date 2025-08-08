@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import * as path from 'path'
 import * as os from 'os'
+import { findClaudeLogFiles } from './utils/file-finder.js'
 import { StreamParser } from './parser/stream-parser.js'
 import { ToolAnalyzer } from './analyzer/tool.js'
 import { SubagentAnalyzer } from './analyzer/subagent.js'
@@ -170,16 +171,18 @@ function showVersion(): void {
 }
 
 async function findDefaultLogFiles(): Promise<string[]> {
-  // TODO: Implement actual file finding logic
-  const paths: string[] = []
+  // Get current working directory to find project-specific log
+  const currentProject = process.cwd()
   
-  // Check ~/.claude/projects/
-  const claudePath = path.join(os.homedir(), '.claude', 'projects')
-  // Check ~/.config/claude/projects/
-  const configPath = path.join(os.homedir(), '.config', 'claude', 'projects')
+  // Find all Claude log files, prioritizing current project
+  const logFiles = await findClaudeLogFiles(currentProject)
   
-  // For now, return empty array - will implement file finding later
-  return paths
+  if (logFiles.length === 0) {
+    console.warn('No Claude log files found in ~/.claude/projects/ or ~/.config/claude/projects/')
+    console.warn('Please ensure Claude Code has been used and generated logs.')
+  }
+  
+  return logFiles
 }
 
 function formatJson(toolStats: any, subagentStats: any): string {
