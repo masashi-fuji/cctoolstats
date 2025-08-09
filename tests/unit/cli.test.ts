@@ -87,6 +87,39 @@ describe('CLI', () => {
       const args = parseArgs(['--format', 'invalid']);
       expect(args.format).toBe('invalid'); // Will be validated later
     });
+
+    it('should parse color option', () => {
+      const args = parseArgs(['--color']);
+      expect(args.color).toBe(true);
+    });
+
+    it('should parse no-color option', () => {
+      const args = parseArgs(['--no-color']);
+      expect(args.color).toBe(false);
+    });
+
+    it('should parse improved option', () => {
+      const args = parseArgs(['--improved']);
+      expect(args.improved).toBe(true);
+    });
+
+    it('should parse thousand-separator option', () => {
+      const args = parseArgs(['--thousand-separator']);
+      expect(args.thousandSeparator).toBe(true);
+    });
+
+    it('should parse combined formatting options', () => {
+      const args = parseArgs([
+        '--improved',
+        '--color',
+        '--thousand-separator',
+        '--format', 'table'
+      ]);
+      expect(args.improved).toBe(true);
+      expect(args.color).toBe(true);
+      expect(args.thousandSeparator).toBe(true);
+      expect(args.format).toBe('table');
+    });
   });
 
   describe('run', () => {

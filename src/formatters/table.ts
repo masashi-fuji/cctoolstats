@@ -3,12 +3,17 @@
  */
 
 import Table from 'cli-table3'
+import chalk from 'chalk'
 
 export interface TableFormatterOptions {
   maxWidth?: number;
   showPercentages?: boolean;
   showHeader?: boolean;
   columnSeparator?: string;
+  improvedFormat?: boolean;
+  useColors?: boolean;
+  useThousandSeparator?: boolean;
+  showSummaryRow?: boolean;
 }
 
 export class TableFormatter {
@@ -19,8 +24,39 @@ export class TableFormatter {
       maxWidth: options.maxWidth,
       showPercentages: options.showPercentages !== false,
       showHeader: options.showHeader !== false,
-      columnSeparator: options.columnSeparator || '  '
+      columnSeparator: options.columnSeparator || '  ',
+      improvedFormat: options.improvedFormat || false,
+      useColors: options.useColors || false,
+      useThousandSeparator: options.useThousandSeparator || false,
+      showSummaryRow: options.showSummaryRow || false
     };
+  }
+  
+  /**
+   * Format number with thousand separators
+   */
+  private formatNumber(num: number): string {
+    if (this.options.useThousandSeparator) {
+      return num.toLocaleString('en-US');
+    }
+    return num.toString();
+  }
+  
+  /**
+   * Apply color based on percentage
+   */
+  private applyColor(text: string, percentage: number): string {
+    if (!this.options.useColors) {
+      return text;
+    }
+    
+    if (percentage > 50) {
+      return chalk.green(text);
+    } else if (percentage >= 20) {
+      return chalk.yellow(text);
+    } else {
+      return chalk.gray(text);
+    }
   }
   
   /**
@@ -43,14 +79,27 @@ export class TableFormatter {
       .sort((a, b) => (b[1] as number) - (a[1] as number));
     
     // Build table
-    const tableOptions: any = {
-      head: this.options.showPercentages 
-        ? ['Tool', 'Count', 'Percentage']
-        : ['Tool', 'Count'],
-      style: {
-        head: ['cyan']
-      }
-    };
+    let tableOptions: any;
+    
+    if (this.options.improvedFormat) {
+      // Improved format: combine percentage and count
+      tableOptions = {
+        head: ['Tool', 'Usage', 'Percentage & Count'],
+        style: {
+          head: ['cyan']
+        },
+        colAligns: ['left', 'right', 'right']
+      };
+    } else {
+      tableOptions = {
+        head: this.options.showPercentages 
+          ? ['Tool', 'Count', 'Percentage']
+          : ['Tool', 'Count'],
+        style: {
+          head: ['cyan']
+        }
+      };
+    }
     
     // Only add colWidths if maxWidth is specified
     if (this.options.maxWidth) {
@@ -60,15 +109,43 @@ export class TableFormatter {
     const table = new Table(tableOptions);
     
     for (const [tool, count] of sortedTools) {
-      const row: any[] = [tool, count];
-      if (this.options.showPercentages) {
-        row.push(`${data.toolPercentages[tool].toFixed(2)}%`);
+      if (this.options.improvedFormat) {
+        const percentage = data.toolPercentages[tool];
+        const formattedCount = this.formatNumber(count as number);
+        const percentageText = `${percentage.toFixed(2)}%`;
+        const combinedText = `${percentageText} (${formattedCount})`;
+        
+        const row = [
+          tool,
+          formattedCount,
+          this.applyColor(combinedText, percentage)
+        ];
+        table.push(row);
+      } else {
+        const row: any[] = [tool, count];
+        if (this.options.showPercentages) {
+          row.push(`${data.toolPercentages[tool].toFixed(2)}%`);
+        }
+        table.push(row);
       }
-      table.push(row);
+    }
+    
+    // Add summary row if requested
+    if (this.options.improvedFormat && this.options.showSummaryRow) {
+      table.push([
+        chalk.bold('Total'),
+        chalk.bold(this.formatNumber(data.totalInvocations)),
+        chalk.bold('100.00%')
+      ]);
     }
     
     lines.push(table.toString());
-    lines.push(`Total: ${data.totalInvocations}`);
+    
+    // Format total line
+    const totalLine = this.options.useThousandSeparator 
+      ? `Total: ${this.formatNumber(data.totalInvocations)}`
+      : `Total: ${data.totalInvocations}`;
+    lines.push(totalLine);
     
     return lines.join('\n');
   }
@@ -93,14 +170,27 @@ export class TableFormatter {
       .sort((a, b) => (b[1] as number) - (a[1] as number));
     
     // Build table
-    const tableOptions: any = {
-      head: this.options.showPercentages 
-        ? ['Subagent', 'Count', 'Percentage']
-        : ['Subagent', 'Count'],
-      style: {
-        head: ['cyan']
-      }
-    };
+    let tableOptions: any;
+    
+    if (this.options.improvedFormat) {
+      // Improved format: combine percentage and count
+      tableOptions = {
+        head: ['Subagent', 'Usage', 'Percentage & Count'],
+        style: {
+          head: ['cyan']
+        },
+        colAligns: ['left', 'right', 'right']
+      };
+    } else {
+      tableOptions = {
+        head: this.options.showPercentages 
+          ? ['Subagent', 'Count', 'Percentage']
+          : ['Subagent', 'Count'],
+        style: {
+          head: ['cyan']
+        }
+      };
+    }
     
     // Only add colWidths if maxWidth is specified
     if (this.options.maxWidth) {
@@ -110,15 +200,43 @@ export class TableFormatter {
     const table = new Table(tableOptions);
     
     for (const [agent, count] of sortedAgents) {
-      const row: any[] = [agent, count];
-      if (this.options.showPercentages) {
-        row.push(`${data.agentPercentages[agent].toFixed(2)}%`);
+      if (this.options.improvedFormat) {
+        const percentage = data.agentPercentages[agent];
+        const formattedCount = this.formatNumber(count as number);
+        const percentageText = `${percentage.toFixed(2)}%`;
+        const combinedText = `${percentageText} (${formattedCount})`;
+        
+        const row = [
+          agent,
+          formattedCount,
+          this.applyColor(combinedText, percentage)
+        ];
+        table.push(row);
+      } else {
+        const row: any[] = [agent, count];
+        if (this.options.showPercentages) {
+          row.push(`${data.agentPercentages[agent].toFixed(2)}%`);
+        }
+        table.push(row);
       }
-      table.push(row);
+    }
+    
+    // Add summary row if requested
+    if (this.options.improvedFormat && this.options.showSummaryRow) {
+      table.push([
+        chalk.bold('Total'),
+        chalk.bold(this.formatNumber(data.totalInvocations)),
+        chalk.bold('100.00%')
+      ]);
     }
     
     lines.push(table.toString());
-    lines.push(`Total: ${data.totalInvocations}`);
+    
+    // Format total line
+    const totalLine = this.options.useThousandSeparator 
+      ? `Total: ${this.formatNumber(data.totalInvocations)}`
+      : `Total: ${data.totalInvocations}`;
+    lines.push(totalLine);
     
     return lines.join('\n');
   }

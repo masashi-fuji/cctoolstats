@@ -28,6 +28,9 @@ export interface CliArgs {
   verbose: boolean
   help: boolean
   version: boolean
+  color?: boolean
+  improved: boolean
+  thousandSeparator: boolean
 }
 
 export function parseArgs(args: string[]): CliArgs {
@@ -37,7 +40,10 @@ export function parseArgs(args: string[]): CliArgs {
     output: undefined,
     verbose: false,
     help: false,
-    version: false
+    version: false,
+    color: undefined,  // undefined means auto-detect based on TTY
+    improved: false,
+    thousandSeparator: false
   }
 
   let i = 0
@@ -54,6 +60,14 @@ export function parseArgs(args: string[]): CliArgs {
       result.help = true
     } else if (arg === '--version') {
       result.version = true
+    } else if (arg === '--color') {
+      result.color = true
+    } else if (arg === '--no-color') {
+      result.color = false
+    } else if (arg === '--improved') {
+      result.improved = true
+    } else if (arg === '--thousand-separator') {
+      result.thousandSeparator = true
     } else if (!arg.startsWith('-')) {
       result.paths.push(arg)
     }
@@ -140,7 +154,17 @@ export async function run(args: string[]): Promise<void> {
         break
       case 'table':
       default:
-        const formatter = new TableFormatter()
+        // Determine if colors should be used
+        const useColors = parsedArgs.color !== undefined 
+          ? parsedArgs.color 
+          : process.stdout.isTTY  // Auto-detect based on TTY
+        
+        const formatter = new TableFormatter({
+          improvedFormat: parsedArgs.improved,
+          useColors: useColors,
+          useThousandSeparator: parsedArgs.thousandSeparator,
+          showSummaryRow: parsedArgs.improved  // Show summary row with improved format
+        })
         output = formatter.formatCombinedStats(toolStats, subagentStats)
         break
     }
@@ -170,12 +194,18 @@ Options:
   -v, --verbose          Enable verbose output
   -h, --help             Display help information
   --version              Display version information
+  --improved             Use improved table format with combined stats
+  --color                Force colored output
+  --no-color             Disable colored output
+  --thousand-separator   Format numbers with thousand separators
 
 Examples:
   cctoolstats                                    # Analyze default log locations
   cctoolstats file1.jsonl file2.jsonl           # Analyze specific files
   cctoolstats --format json                     # Output as JSON
-  cctoolstats --output results.csv --format csv # Save as CSV file`
+  cctoolstats --output results.csv --format csv # Save as CSV file
+  cctoolstats --improved --color                # Use improved format with colors
+  cctoolstats --improved --thousand-separator   # Improved format with number formatting`
   
   console.log(helpText)
 }
