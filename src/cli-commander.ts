@@ -56,23 +56,7 @@ Examples:
   $ cctoolstats --improved --thousand-separator   # Improved format with number formatting`)
 
 export async function run(argv: string[]): Promise<void> {
-  // Ensure argv array has the proper format for Commander
-  const fullArgv = argv[0] && argv[0].includes('node') 
-    ? argv 
-    : ['node', 'cli.ts', ...argv]
-  
-  // Check for help or version early
-  if (fullArgv.includes('--help') || fullArgv.includes('-h')) {
-    console.log(program.helpInformation())
-    process.exit(0)
-  }
-  
-  if (fullArgv.includes('--version')) {
-    console.log(`cctoolstats v${version}`)
-    process.exit(0)
-  }
-  
-  program.parse(fullArgv, { from: 'node' })
+  program.parse(argv, { from: 'node' })
   const options = program.opts()
   const files = program.args
 
@@ -267,34 +251,20 @@ export function parseArgs(args: string[]): CliArgs {
   const opts = testProgram.opts()
   const files = testProgram.args
 
-  // Handle project selection logic - last option wins
-  let current = true  // default
+  // Handle project selection logic
+  let current = true
   let all = false
   let project = undefined
 
-  // Process in order to let last option win
-  for (const arg of args) {
-    if (arg === '--current') {
-      current = true
-      all = false
-      project = undefined
-    } else if (arg === '--all') {
-      all = true
-      current = false
-      project = undefined
-    } else if (arg === '--project') {
-      // Find the next arg as the project path
-      const idx = args.indexOf(arg)
-      if (idx !== -1 && idx + 1 < args.length) {
-        project = args[idx + 1]
-        current = false
-        all = false
-      }
-    }
-  }
-
-  // If no project option was specified, default to current
-  if (!args.includes('--current') && !args.includes('--all') && !args.includes('--project')) {
+  if (opts.all) {
+    all = true
+    current = false
+    project = undefined
+  } else if (opts.project) {
+    project = opts.project
+    current = false
+    all = false
+  } else if (opts.current) {
     current = true
     all = false
     project = undefined
