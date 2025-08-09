@@ -1,7 +1,10 @@
 ---
-status: open
-created: 2025-08-09
-title: --improvedオプションの削除
+priority: 2
+tags: ["refactoring", "cleanup"]
+description: "使用頻度の低い--improvedオプションを削除してコードベースを簡素化"
+created_at: "2025-08-09T12:16:59Z"
+started_at: # Do not modify manually
+closed_at: # Do not modify manually
 ---
 
 # [remove-improved-option] --improvedオプションの削除
