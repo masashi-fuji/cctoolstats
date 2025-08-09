@@ -317,7 +317,8 @@ export function parseArgs(args: string[]): CliArgs {
 }
 
 // Main CLI entry point
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Always run when imported as a CLI tool (from bin/cctoolstats.js or directly)
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('/cctoolstats.js')) {
   run(process.argv).catch(error => {
     console.error('Error:', error)
     process.exit(1)
