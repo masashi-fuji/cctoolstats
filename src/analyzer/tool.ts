@@ -39,6 +39,10 @@ export class ToolAnalyzer {
       if (entry.name === 'Task' && entry.input?.subagent_type) {
         return false;
       }
+      // Skip Agent tools that are subagent invocations
+      if (entry.name === 'Agent' && entry.input?.subagent_type) {
+        return false;
+      }
       return true;
     }
     // Old format: tool_invocation (backward compatibility)

@@ -102,8 +102,22 @@ export async function run(args: string[]): Promise<void> {
       const parser = new StreamParser()
       const stream = createReadStream(filePath, { encoding: 'utf8' })
       
-      for await (const entry of parser.parseStream(stream)) {
-        allEntries.push(entry)
+      // Parse raw entries and extract tool_use entries
+      for await (const rawEntry of parser.parseStream(stream)) {
+        // Extract tool_use entries from assistant messages
+        if (rawEntry.type === 'assistant' && rawEntry.message?.content) {
+          for (const content of rawEntry.message.content) {
+            if (content.type === 'tool_use') {
+              allEntries.push({
+                type: 'tool_use',
+                name: content.name,
+                input: content.input,
+                timestamp: rawEntry.timestamp,
+                id: content.id
+              })
+            }
+          }
+        }
       }
     }
     

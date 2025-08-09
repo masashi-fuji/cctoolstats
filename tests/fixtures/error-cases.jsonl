@@ -1,0 +1,9 @@
+invalid json line {{{
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"assistant","timestamp":"2025-01-05T00:00:00Z","uuid":"error-001","message":null}
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"assistant","timestamp":"2025-01-05T00:01:00Z","uuid":"error-002","message":{"role":"assistant"}}
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"assistant","timestamp":"2025-01-05T00:02:00Z","uuid":"error-003","message":{"role":"assistant","content":"not an array"}}
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"assistant","timestamp":"2025-01-05T00:03:00Z","uuid":"error-004","message":{"role":"assistant","content":[{"type":"tool_use"}]}}
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"assistant","timestamp":"2025-01-05T00:04:00Z","uuid":"error-005","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_err01"}]}}
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"assistant","timestamp":"not-a-date","uuid":"error-006","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_err02","name":"Bash","input":{}}]}}
+
+{"parentUuid":null,"isSidechain":false,"userType":"external","cwd":"/error","sessionId":"error-001","version":"1.0.60","gitBranch":"","type":"unknown","timestamp":"2025-01-05T00:05:00Z","uuid":"error-007","message":{"role":"unknown","content":[{"type":"tool_use","id":"toolu_err03","name":"Read","input":{}}]}}

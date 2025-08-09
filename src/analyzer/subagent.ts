@@ -33,6 +33,10 @@ export class SubagentAnalyzer {
     if (entry.type === 'tool_use' && entry.name === 'Task' && entry.input?.subagent_type) {
       return true;
     }
+    // Agent tool with subagent_type (similar to Task)
+    if (entry.type === 'tool_use' && entry.name === 'Agent' && entry.input?.subagent_type) {
+      return true;
+    }
     // Old format: subagent_invocation (backward compatibility)
     if (entry.type === 'subagent_invocation' && entry.agent) {
       return true;
@@ -50,6 +54,10 @@ export class SubagentAnalyzer {
     }
     // Task tool with subagent_type
     if (entry.type === 'tool_use' && entry.name === 'Task' && entry.input?.subagent_type) {
+      return entry.input.subagent_type;
+    }
+    // Agent tool with subagent_type (similar to Task)
+    if (entry.type === 'tool_use' && entry.name === 'Agent' && entry.input?.subagent_type) {
       return entry.input.subagent_type;
     }
     // Old format: subagent_invocation
