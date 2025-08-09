@@ -1,3 +1,9 @@
+---
+status: open
+created: 2025-08-09
+title: --improvedオプションの削除
+---
+
 # [remove-improved-option] --improvedオプションの削除
 
 ## 背景
