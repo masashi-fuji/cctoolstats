@@ -30,8 +30,11 @@ npm install -g cctoolstats
 ### 基本的な使い方
 
 ```bash
-# 現在のプロジェクトの統計を表示（デフォルト）
+# 現在のディレクトリの統計を表示（デフォルト）
 cctoolstats
+
+# 複数のプロジェクトディレクトリを分析
+cctoolstats ~/project1 ~/project2
 
 # 全プロジェクトの統計を表示
 cctoolstats --all
@@ -39,8 +42,8 @@ cctoolstats --all
 # 特定のプロジェクトを分析
 cctoolstats --project /path/to/project
 
-# 特定のログファイルを分析
-cctoolstats file1.jsonl file2.jsonl
+# 特定のログファイルを分析（後方互換性）
+cctoolstats file.jsonl
 ```
 
 ### 出力フォーマット

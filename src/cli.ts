@@ -5,7 +5,7 @@
  */
 
 import { Command } from 'commander'
-import { readFileSync, writeFileSync, createReadStream } from 'fs'
+import { readFileSync, writeFileSync, createReadStream, realpathSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import * as path from 'path'
@@ -27,7 +27,7 @@ program
   .name('cctoolstats')
   .description('Analyze Claude Code tool usage statistics')
   .version(version)
-  .argument('[files...]', 'specific log files to analyze')
+  .argument('[paths...]', 'directories or log files to analyze')
   .option('-f, --format <format>', 'output format (table, json, csv)', 'table')
   .option('-o, --output <file>', 'output to file instead of stdout')
   .option('-v, --verbose', 'enable verbose output', false)
@@ -44,13 +44,15 @@ Project Selection:
   --project <path>       Analyze specific project by path
 
 Examples:
-  $ cctoolstats                                    # Analyze current project (default)
+  $ cctoolstats                                    # Analyze current directory (default)
+  $ cctoolstats ~/project1 ~/project2              # Analyze multiple project directories
   $ cctoolstats --current                          # Explicitly analyze current project
   $ cctoolstats --all                              # Analyze all projects
   $ cctoolstats --project /path/to/project         # Analyze specific project
-  $ cctoolstats file1.jsonl file2.jsonl           # Analyze specific files
-  $ cctoolstats --all --format json               # All projects as JSON
-  $ cctoolstats --output results.csv --format csv # Save as CSV file`)
+  $ cctoolstats --format json ~/myproject          # JSON format for specific project
+  $ cctoolstats file.jsonl                         # Analyze specific file (backward compatibility)
+  $ cctoolstats --all --format json                # All projects as JSON
+  $ cctoolstats --output results.csv --format csv  # Save as CSV file`)
 
 export async function run(argv: string[]): Promise<void> {
   // Ensure argv array has the proper format for Commander
@@ -58,20 +60,10 @@ export async function run(argv: string[]): Promise<void> {
     ? argv 
     : ['node', 'cli.ts', ...argv]
   
-  // Check for help or version early
-  if (fullArgv.includes('--help') || fullArgv.includes('-h')) {
-    console.log(program.helpInformation())
-    process.exit(0)
-  }
-  
-  if (fullArgv.includes('--version')) {
-    console.log(`cctoolstats v${version}`)
-    process.exit(0)
-  }
-  
+  // Parse arguments - Commander will handle help and version automatically
   program.parse(fullArgv, { from: 'node' })
   const options = program.opts()
-  const files = program.args
+  const paths = program.args
 
   // Validate format
   const validFormats = ['table', 'json', 'csv']
@@ -83,9 +75,36 @@ export async function run(argv: string[]): Promise<void> {
   // Determine which log files to use
   let logFiles: string[] = []
   
-  if (files.length > 0) {
-    // Use explicitly provided files
-    logFiles = files
+  if (paths.length > 0) {
+    // Process provided paths (directories or files)
+    const { statSync } = await import('fs')
+    
+    for (const pathItem of paths) {
+      try {
+        // Expand ~ to home directory and resolve symlinks
+        const expandedPath = pathItem.replace(/^~/, os.homedir())
+        const resolvedPath = realpathSync(expandedPath)
+        
+        const stat = statSync(resolvedPath)
+        if (stat.isDirectory()) {
+          // It's a directory - find transcript files in it
+          const dirFiles = await findClaudeLogFiles(resolvedPath)
+          logFiles.push(...dirFiles)
+        } else if (resolvedPath.endsWith('.jsonl')) {
+          // It's a JSONL file - use directly (backward compatibility)
+          logFiles.push(resolvedPath)
+        } else {
+          console.warn(`Warning: Skipping non-JSONL file: ${pathItem}`)
+        }
+      } catch (error) {
+        console.warn(`Warning: Cannot access path: ${pathItem}`)
+      }
+    }
+    
+    if (logFiles.length === 0) {
+      console.error('Error: No valid transcript files found in specified paths')
+      process.exit(1)
+    }
   } else {
     // Use project selection options
     if (options.all) {
@@ -254,11 +273,11 @@ export function parseArgs(args: string[]): CliArgs {
     .option('--current', 'current project', false)
     .option('--all', 'all projects', false)
     .option('--project <path>', 'specific project')
-    .argument('[files...]', 'files to analyze')
+    .argument('[paths...]', 'directories or files to analyze')
 
   testProgram.parse(['node', 'cli.ts', ...args], { from: 'node' })
   const opts = testProgram.opts()
-  const files = testProgram.args
+  const paths = testProgram.args
 
   // Handle project selection logic - last option wins
   let current = true  // default
@@ -294,7 +313,7 @@ export function parseArgs(args: string[]): CliArgs {
   }
 
   return {
-    paths: files,
+    paths: paths,
     format: opts.format || 'table',
     output: opts.output,
     verbose: opts.verbose || false,

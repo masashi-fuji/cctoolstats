@@ -67,22 +67,22 @@ describe('file-finder', () => {
   describe('convertProjectPathToFileName', () => {
     it('should convert absolute project path to Claude format', () => {
       const result = convertProjectPathToFileName('/home/user/projects/my-app')
-      expect(result).toBe('home-user-projects-my-app.jsonl')
+      expect(result).toBe('-home-user-projects-my-app')
     })
 
     it('should handle paths with trailing slashes', () => {
       const result = convertProjectPathToFileName('/home/user/project/')
-      expect(result).toBe('home-user-project.jsonl')
+      expect(result).toBe('-home-user-project')
     })
 
     it('should handle relative paths', () => {
       const result = convertProjectPathToFileName('projects/my-app')
-      expect(result).toBe('projects-my-app.jsonl')
+      expect(result).toBe('-projects-my-app')
     })
 
     it('should handle Windows-style paths', () => {
       const result = convertProjectPathToFileName('C:\\Users\\user\\project')
-      expect(result).toBe('C:-Users-user-project.jsonl')
+      expect(result).toBe('-C-Users-user-project')
     })
   })
 
@@ -114,22 +114,22 @@ describe('file-finder', () => {
       mockHomedir.mockReturnValue('/home/testuser')
 
       const mockReaddir = vi.mocked(fs.readdir)
-      const mockAccess = vi.mocked(fs.access)
       
-      // Mock empty directories
-      mockReaddir.mockResolvedValue([])
-      
-      // Mock that the specific project file exists in new location
-      mockAccess.mockImplementation(async (path) => {
-        if (path === '/home/testuser/.config/claude/projects/home-testuser-my-project.jsonl') {
-          return Promise.resolve()
+      // Mock that the project directory exists with JSONL files
+      mockReaddir.mockImplementation(async (path) => {
+        if (path === '/home/testuser/.config/claude/projects/-home-testuser-my-project') {
+          return [
+            { name: 'session1.jsonl', isFile: () => true, isDirectory: () => false },
+            { name: 'session2.jsonl', isFile: () => true, isDirectory: () => false }
+          ] as any
         }
-        throw new Error('File not found')
+        throw new Error('Directory not found')
       })
 
       const result = await findClaudeLogFiles('/home/testuser/my-project')
       
-      expect(result).toContain('/home/testuser/.config/claude/projects/home-testuser-my-project.jsonl')
+      expect(result).toContain('/home/testuser/.config/claude/projects/-home-testuser-my-project/session1.jsonl')
+      expect(result).toContain('/home/testuser/.config/claude/projects/-home-testuser-my-project/session2.jsonl')
     })
 
     it('should handle missing directories gracefully', async () => {

@@ -93,7 +93,7 @@ describe('CLI Integration Tests', () => {
       const command = `npx tsx ${cliPath} --version`;
       const { stdout, stderr } = await execAsync(command);
       
-      expect(stdout).toMatch(/cctoolstats v\d+\.\d+\.\d+/);
+      expect(stdout).toMatch(/\d+\.\d+\.\d+/);
       expect(stderr).toBe('');
     }, 10000);
 

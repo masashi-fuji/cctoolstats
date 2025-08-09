@@ -3,8 +3,8 @@ priority: 2
 tags: []
 description: ""
 created_at: "2025-08-09T13:11:39Z"
-started_at: null  # Do not modify manually
-closed_at: null   # Do not modify manually
+started_at: 2025-08-09T13:14:13Z # Do not modify manually
+closed_at: 2025-08-09T14:13:19Z # Do not modify manually
 ---
 
 # Ticket: CLI Directory Arguments Support
@@ -16,20 +16,20 @@ closed_at: null   # Do not modify manually
 現在のユースケースでは、プロジェクトに対して実行することが殆どであり、ファイルを直接指定するケースは少ない。ディレクトリを指定した時には、自動的にトランスクリプトファイルを探して解析するようにすることで、より直感的な使用感を提供できる。
 
 ## 実装タスク
-- [ ] CLI引数処理の変更 (src/cli.ts)
-  - [ ] argument定義を [paths...] に変更
-  - [ ] ディレクトリ判定ロジックの追加
-  - [ ] ディレクトリからトランスクリプトファイルを自動検索する処理
-  - [ ] ヘルプテキストの更新
-- [ ] README.mdの更新
-  - [ ] 使用例をディレクトリベースに更新
-  - [ ] ファイル直接指定を特殊ケースとして記載
-- [ ] テストの追加・更新 (tests/unit/cli.test.ts)
-  - [ ] ディレクトリ指定のテストケース追加
-  - [ ] 複数ディレクトリ指定のテスト
-  - [ ] ディレクトリとファイル混在のテスト
-- [ ] Run tests before closing and pass all tests (No exceptions)
-- [ ] Get developer approval before closing
+- [x] CLI引数処理の変更 (src/cli.ts)
+  - [x] argument定義を [paths...] に変更
+  - [x] ディレクトリ判定ロジックの追加
+  - [x] ディレクトリからトランスクリプトファイルを自動検索する処理
+  - [x] ヘルプテキストの更新
+- [x] README.mdの更新
+  - [x] 使用例をディレクトリベースに更新
+  - [x] ファイル直接指定を特殊ケースとして記載
+- [x] テストの追加・更新 (tests/unit/cli.test.ts)
+  - [x] ディレクトリ指定のテストケース追加
+  - [x] 複数ディレクトリ指定のテスト
+  - [x] ディレクトリとファイル混在のテスト
+- [x] Run tests before closing and pass all tests (No exceptions)
+- [x] Get developer approval before closing
 
 ## 仕様詳細
 
@@ -51,9 +51,9 @@ cctoolstats file.jsonl                   # 特定ファイル（後方互換性�
 ```
 
 ## 受け入れ基準
-- [ ] ディレクトリを指定した場合、そのプロジェクトのトランスクリプトファイルが自動的に解析される
-- [ ] 複数のディレクトリを指定できる
-- [ ] .jsonlファイルの直接指定も引き続き動作する（後方互換性）
-- [ ] ヘルプメッセージが新しい構文を反映している
-- [ ] すべての既存テストが通る
-- [ ] 新規テストが追加され、通る
+- [x] ディレクトリを指定した場合、そのプロジェクトのトランスクリプトファイルが自動的に解析される
+- [x] 複数のディレクトリを指定できる
+- [x] .jsonlファイルの直接指定も引き続き動作する（後方互換性）
+- [x] ヘルプメッセージが新しい構文を反映している
+- [x] すべての既存テストが通る
+- [x] 新規テストが追加され、通る

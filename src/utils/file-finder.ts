@@ -34,14 +34,19 @@ export async function findLogFiles(directory: string): Promise<string[]> {
  * Example: /home/user/project -> home-user-project.jsonl
  */
 export function convertProjectPathToFileName(projectPath: string): string {
-  // Remove leading slash and trailing slash, replace all path separators with dashes
-  // Also handle Windows-style backslashes
+  // Claude Code uses a specific format for project directories:
+  // - Leading dash is added
+  // - All path separators and dots become dashes
+  // - No file extension (it's a directory)
   const normalized = projectPath
     .replace(/^[/\\]+/, '')  // Remove leading slashes or backslashes
     .replace(/[/\\]+$/, '')  // Remove trailing slashes or backslashes
     .replace(/[/\\]+/g, '-') // Replace all path separators with dashes
-    .replace(/:/g, ':')      // Keep colons for Windows drive letters
-  return `${normalized}.jsonl`
+    .replace(/\./g, '-')     // Replace dots with dashes (e.g., github.com -> github-com)
+    .replace(/:/g, '')       // Remove colons (Windows drive letters)
+  
+  // Claude Code adds a leading dash to directory names
+  return `-${normalized}`
 }
 
 /**
@@ -54,34 +59,30 @@ export async function findClaudeLogFiles(currentProjectPath?: string): Promise<s
   
   // Check new path (v1.0.30+)
   const newPath = path.join(homeDir, '.config', 'claude', 'projects')
-  const newFiles = await findLogFiles(newPath)
-  paths.push(...newFiles)
-  
   // Check old path (v1.0.29 and earlier)
   const oldPath = path.join(homeDir, '.claude', 'projects')
-  const oldFiles = await findLogFiles(oldPath)
-  paths.push(...oldFiles)
   
-  // If current project path is provided, look for specific file
   if (currentProjectPath) {
-    const fileName = convertProjectPathToFileName(currentProjectPath)
+    // If specific project path is provided, only look for that project's files
+    const dirName = convertProjectPathToFileName(currentProjectPath)
     
-    // Check if specific project file exists in either location
-    const specificPaths = [
-      path.join(newPath, fileName),
-      path.join(oldPath, fileName)
+    // Check if specific project directory exists and get all JSONL files within it
+    const projectDirs = [
+      path.join(newPath, dirName),
+      path.join(oldPath, dirName)
     ]
     
-    for (const specificPath of specificPaths) {
-      try {
-        await fs.access(specificPath)
-        if (!paths.includes(specificPath)) {
-          paths.push(specificPath)
-        }
-      } catch {
-        // File doesn't exist, continue
-      }
+    for (const projectDir of projectDirs) {
+      const projectFiles = await findLogFiles(projectDir)
+      paths.push(...projectFiles)
     }
+  } else {
+    // No project path specified - return all log files
+    const newFiles = await findLogFiles(newPath)
+    paths.push(...newFiles)
+    
+    const oldFiles = await findLogFiles(oldPath)
+    paths.push(...oldFiles)
   }
   
   // Remove duplicates and return
