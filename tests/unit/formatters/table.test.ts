@@ -167,33 +167,8 @@ describe('TableFormatter', () => {
     });
   });
 
-  describe('improved formatting', () => {
-    it('should display both percentage and count in a single column', () => {
-      const data = {
-        totalInvocations: 542,
-        uniqueTools: 3,
-        toolCounts: {
-          'Bash': 245,
-          'Read': 123,
-          'Edit': 89
-        },
-        toolPercentages: {
-          'Bash': 45.20,
-          'Read': 22.69,
-          'Edit': 16.42
-        }
-      };
-
-      const formatter = new TableFormatter({ improvedFormat: true });
-      const result = formatter.formatToolStats(data);
-
-      // Should show combined format like "45.20% (245 times)"
-      expect(result).toContain('45.20% (245)');
-      expect(result).toContain('22.69% (123)');
-      expect(result).toContain('16.42% (89)');
-    });
-
-    it('should format numbers with thousand separators', () => {
+  describe('thousand separator formatting', () => {
+    it('should format numbers with thousand separators when enabled', () => {
       const data = {
         totalInvocations: 12345,
         uniqueTools: 2,
@@ -207,13 +182,14 @@ describe('TableFormatter', () => {
         }
       };
 
-      const formatter = new TableFormatter({ improvedFormat: true, useThousandSeparator: true });
+      const formatter = new TableFormatter({ useThousandSeparator: true });
       const result = formatter.formatToolStats(data);
 
       expect(result).toContain('10,000');
       expect(result).toContain('2,345');
       expect(result).toContain('Total: 12,345');
     });
+
 
     it('should display a summary row with totals', () => {
       const data = {
@@ -231,7 +207,7 @@ describe('TableFormatter', () => {
         }
       };
 
-      const formatter = new TableFormatter({ improvedFormat: true, showSummaryRow: true });
+      const formatter = new TableFormatter({ showSummaryRow: true });
       const result = formatter.formatToolStats(data);
 
       // Should include a summary row in the table
@@ -256,12 +232,12 @@ describe('TableFormatter', () => {
         }
       };
 
-      const formatter = new TableFormatter({ improvedFormat: true, useColors: true });
+      const formatter = new TableFormatter({ useColors: true });
       const result = formatter.formatToolStats(data);
 
       // Result should contain ANSI color codes
       // We'll check that the output is different when colors are enabled
-      const noColorFormatter = new TableFormatter({ improvedFormat: true, useColors: false });
+      const noColorFormatter = new TableFormatter({ useColors: false });
       const noColorResult = noColorFormatter.formatToolStats(data);
 
       // Strip ANSI codes to compare content
@@ -288,7 +264,7 @@ describe('TableFormatter', () => {
         }
       };
 
-      const formatter = new TableFormatter({ improvedFormat: true });
+      const formatter = new TableFormatter();
       const result = formatter.formatToolStats(data);
 
       // Should handle double-width characters properly
@@ -316,14 +292,13 @@ describe('TableFormatter', () => {
         }
       };
 
-      const formatter = new TableFormatter({ improvedFormat: true });
+      const formatter = new TableFormatter();
       const result = formatter.formatSubagentStats(data);
 
-      // Should show combined format
-      expect(result).toContain('40.00% (100)');
-      expect(result).toContain('30.00% (75)');
-      expect(result).toContain('20.00% (50)');
-      expect(result).toContain('10.00% (25)');
+      // Should show standard format for subagents
+      expect(result).toContain('code-reviewer');
+      expect(result).toContain('100');
+      expect(result).toContain('40.00%');
       expect(result).toContain('Total: 250');
     });
   });

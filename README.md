@@ -68,9 +68,6 @@ cctoolstats --help
 # バージョンを表示
 cctoolstats --version
 
-# 改善されたテーブル形式で表示
-cctoolstats --improved
-
 # 数値を千単位区切りで表示
 cctoolstats --thousand-separator
 

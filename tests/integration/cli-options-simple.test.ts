@@ -37,14 +37,12 @@ describe('CLI Options Parse Integration', () => {
         '--all',
         '--format', 'json',
         '--verbose',
-        '--improved',
         '--thousand-separator'
       ]);
       
       expect(args.all).toBe(true);
       expect(args.format).toBe('json');
       expect(args.verbose).toBe(true);
-      expect(args.improved).toBe(true);
       expect(args.thousandSeparator).toBe(true);
     });
 

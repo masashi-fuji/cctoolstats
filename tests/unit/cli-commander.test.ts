@@ -93,11 +93,6 @@ describe('CLI Commander', () => {
       expect(args.color).toBe(false);
     });
 
-    it('should parse improved option', () => {
-      const args = parseArgs(['--improved']);
-      expect(args.improved).toBe(true);
-    });
-
     it('should parse thousand-separator option', () => {
       const args = parseArgs(['--thousand-separator']);
       expect(args.thousandSeparator).toBe(true);

@@ -10,7 +10,6 @@ export interface TableFormatterOptions {
   showPercentages?: boolean;
   showHeader?: boolean;
   columnSeparator?: string;
-  improvedFormat?: boolean;
   useColors?: boolean;
   useThousandSeparator?: boolean;
   showSummaryRow?: boolean;
@@ -25,7 +24,6 @@ export class TableFormatter {
       showPercentages: options.showPercentages !== false,
       showHeader: options.showHeader !== false,
       columnSeparator: options.columnSeparator || '  ',
-      improvedFormat: options.improvedFormat || false,
       useColors: options.useColors || false,
       useThousandSeparator: options.useThousandSeparator || false,
       showSummaryRow: options.showSummaryRow || false
@@ -81,25 +79,14 @@ export class TableFormatter {
     // Build table
     let tableOptions: any;
     
-    if (this.options.improvedFormat) {
-      // Improved format: combine percentage and count
-      tableOptions = {
-        head: ['Tool', 'Usage', 'Percentage & Count'],
-        style: {
-          head: ['cyan']
-        },
-        colAligns: ['left', 'right', 'right']
-      };
-    } else {
-      tableOptions = {
-        head: this.options.showPercentages 
-          ? ['Tool', 'Count', 'Percentage']
-          : ['Tool', 'Count'],
-        style: {
-          head: ['cyan']
-        }
-      };
-    }
+    tableOptions = {
+      head: this.options.showPercentages 
+        ? ['Tool', 'Count', 'Percentage']
+        : ['Tool', 'Count'],
+      style: {
+        head: ['cyan']
+      }
+    };
     
     // Only add colWidths if maxWidth is specified
     if (this.options.maxWidth) {
@@ -109,34 +96,23 @@ export class TableFormatter {
     const table = new Table(tableOptions);
     
     for (const [tool, count] of sortedTools) {
-      if (this.options.improvedFormat) {
-        const percentage = data.toolPercentages[tool];
-        const formattedCount = this.formatNumber(count as number);
-        const percentageText = `${percentage.toFixed(2)}%`;
-        const combinedText = `${percentageText} (${formattedCount})`;
-        
-        const row = [
-          tool,
-          formattedCount,
-          this.applyColor(combinedText, percentage)
-        ];
-        table.push(row);
-      } else {
-        const row: any[] = [tool, count];
-        if (this.options.showPercentages) {
-          row.push(`${data.toolPercentages[tool].toFixed(2)}%`);
-        }
-        table.push(row);
+      const row: any[] = [tool, this.formatNumber(count as number)];
+      if (this.options.showPercentages) {
+        row.push(`${data.toolPercentages[tool].toFixed(2)}%`);
       }
+      table.push(row);
     }
     
     // Add summary row if requested
-    if (this.options.improvedFormat && this.options.showSummaryRow) {
-      table.push([
+    if (this.options.showSummaryRow) {
+      const summaryRow = [
         chalk.bold('Total'),
-        chalk.bold(this.formatNumber(data.totalInvocations)),
-        chalk.bold('100.00%')
-      ]);
+        chalk.bold(this.formatNumber(data.totalInvocations))
+      ];
+      if (this.options.showPercentages) {
+        summaryRow.push(chalk.bold('100.00%'));
+      }
+      table.push(summaryRow);
     }
     
     lines.push(table.toString());
@@ -172,25 +148,14 @@ export class TableFormatter {
     // Build table
     let tableOptions: any;
     
-    if (this.options.improvedFormat) {
-      // Improved format: combine percentage and count
-      tableOptions = {
-        head: ['Subagent', 'Usage', 'Percentage & Count'],
-        style: {
-          head: ['cyan']
-        },
-        colAligns: ['left', 'right', 'right']
-      };
-    } else {
-      tableOptions = {
-        head: this.options.showPercentages 
-          ? ['Subagent', 'Count', 'Percentage']
-          : ['Subagent', 'Count'],
-        style: {
-          head: ['cyan']
-        }
-      };
-    }
+    tableOptions = {
+      head: this.options.showPercentages 
+        ? ['Subagent', 'Count', 'Percentage']
+        : ['Subagent', 'Count'],
+      style: {
+        head: ['cyan']
+      }
+    };
     
     // Only add colWidths if maxWidth is specified
     if (this.options.maxWidth) {
@@ -200,34 +165,23 @@ export class TableFormatter {
     const table = new Table(tableOptions);
     
     for (const [agent, count] of sortedAgents) {
-      if (this.options.improvedFormat) {
-        const percentage = data.agentPercentages[agent];
-        const formattedCount = this.formatNumber(count as number);
-        const percentageText = `${percentage.toFixed(2)}%`;
-        const combinedText = `${percentageText} (${formattedCount})`;
-        
-        const row = [
-          agent,
-          formattedCount,
-          this.applyColor(combinedText, percentage)
-        ];
-        table.push(row);
-      } else {
-        const row: any[] = [agent, count];
-        if (this.options.showPercentages) {
-          row.push(`${data.agentPercentages[agent].toFixed(2)}%`);
-        }
-        table.push(row);
+      const row: any[] = [agent, this.formatNumber(count as number)];
+      if (this.options.showPercentages) {
+        row.push(`${data.agentPercentages[agent].toFixed(2)}%`);
       }
+      table.push(row);
     }
     
     // Add summary row if requested
-    if (this.options.improvedFormat && this.options.showSummaryRow) {
-      table.push([
+    if (this.options.showSummaryRow) {
+      const summaryRow = [
         chalk.bold('Total'),
-        chalk.bold(this.formatNumber(data.totalInvocations)),
-        chalk.bold('100.00%')
-      ]);
+        chalk.bold(this.formatNumber(data.totalInvocations))
+      ];
+      if (this.options.showPercentages) {
+        summaryRow.push(chalk.bold('100.00%'));
+      }
+      table.push(summaryRow);
     }
     
     lines.push(table.toString());

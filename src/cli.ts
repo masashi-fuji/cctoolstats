@@ -31,7 +31,6 @@ program
   .option('-f, --format <format>', 'output format (table, json, csv)', 'table')
   .option('-o, --output <file>', 'output to file instead of stdout')
   .option('-v, --verbose', 'enable verbose output', false)
-  .option('--improved', 'use improved table format with combined stats', false)
   .option('--color', 'force colored output')
   .option('--no-color', 'disable colored output')
   .option('--thousand-separator', 'format numbers with thousand separators', false)
@@ -51,9 +50,7 @@ Examples:
   $ cctoolstats --project /path/to/project         # Analyze specific project
   $ cctoolstats file1.jsonl file2.jsonl           # Analyze specific files
   $ cctoolstats --all --format json               # All projects as JSON
-  $ cctoolstats --output results.csv --format csv # Save as CSV file
-  $ cctoolstats --improved --color                # Use improved format with colors
-  $ cctoolstats --improved --thousand-separator   # Improved format with number formatting`)
+  $ cctoolstats --output results.csv --format csv # Save as CSV file`)
 
 export async function run(argv: string[]): Promise<void> {
   // Ensure argv array has the proper format for Commander
@@ -171,10 +168,8 @@ export async function run(argv: string[]): Promise<void> {
           : process.stdout.isTTY  // Auto-detect based on TTY
         
         const formatter = new TableFormatter({
-          improvedFormat: options.improved,
           useColors: useColors,
-          useThousandSeparator: options.thousandSeparator,
-          showSummaryRow: options.improved  // Show summary row with improved format
+          useThousandSeparator: options.thousandSeparator
         })
         output = formatter.formatCombinedStats(toolStats, subagentStats)
         break
@@ -237,7 +232,6 @@ export interface CliArgs {
   help: boolean
   version: boolean
   color?: boolean
-  improved: boolean
   thousandSeparator: boolean
   current: boolean
   all: boolean
@@ -254,7 +248,6 @@ export function parseArgs(args: string[]): CliArgs {
     .option('-v, --verbose', 'verbose', false)
     .option('-h, --help', 'help', false)
     .option('--version', 'version', false)
-    .option('--improved', 'improved format', false)
     .option('--color', 'force color')
     .option('--no-color', 'no color')
     .option('--thousand-separator', 'thousand separator', false)
@@ -308,7 +301,6 @@ export function parseArgs(args: string[]): CliArgs {
     help: opts.help || false,
     version: opts.version || false,
     color: opts.color,
-    improved: opts.improved || false,
     thousandSeparator: opts.thousandSeparator || false,
     current,
     all,
