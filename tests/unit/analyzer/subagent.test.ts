@@ -6,23 +6,23 @@ describe('SubagentAnalyzer', () => {
     it('should count subagent invocations', () => {
       const entries = [
         {
-          type: 'subagent_invocation',
-          agent: 'code-reviewer',
+          type: 'subagent',
+          name: 'code-reviewer',
           timestamp: '2025-01-01T00:00:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'test-writer',
+          type: 'subagent',
+          name: 'test-writer',
           timestamp: '2025-01-01T00:01:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'code-reviewer',
+          type: 'subagent',
+          name: 'code-reviewer',
           timestamp: '2025-01-01T00:02:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Bash',
+          type: 'tool_use',
+          name: 'Bash',
           timestamp: '2025-01-01T00:03:00Z'
         }
       ];
@@ -49,7 +49,7 @@ describe('SubagentAnalyzer', () => {
 
     it('should handle entries without subagent invocations', () => {
       const entries = [
-        { type: 'tool_invocation', tool: 'Bash' },
+        { type: 'tool_use', name: 'Bash' },
         { type: 'message', content: 'Hello' },
         { type: 'error', message: 'Error occurred' }
       ];
@@ -64,12 +64,12 @@ describe('SubagentAnalyzer', () => {
 
     it('should calculate agent percentages', () => {
       const entries = [
-        { type: 'subagent_invocation', agent: 'agent-a' },
-        { type: 'subagent_invocation', agent: 'agent-a' },
-        { type: 'subagent_invocation', agent: 'agent-b' },
-        { type: 'subagent_invocation', agent: 'agent-b' },
-        { type: 'subagent_invocation', agent: 'agent-b' },
-        { type: 'subagent_invocation', agent: 'agent-c' }
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'subagent', name: 'agent-b' },
+        { type: 'subagent', name: 'agent-b' },
+        { type: 'subagent', name: 'agent-b' },
+        { type: 'subagent', name: 'agent-c' }
       ];
 
       const analyzer = new SubagentAnalyzer();
@@ -85,18 +85,18 @@ describe('SubagentAnalyzer', () => {
     it('should track agent timeline', () => {
       const entries = [
         {
-          type: 'subagent_invocation',
-          agent: 'agent-a',
+          type: 'subagent',
+          name: 'agent-a',
           timestamp: '2025-01-01T10:00:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-b',
+          type: 'subagent',
+          name: 'agent-b',
           timestamp: '2025-01-01T10:05:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-a',
+          type: 'subagent',
+          name: 'agent-a',
           timestamp: '2025-01-01T10:10:00Z'
         }
       ];
@@ -126,13 +126,13 @@ describe('SubagentAnalyzer', () => {
   describe('getTopAgents', () => {
     it('should return top N agents by invocation count', () => {
       const entries = [
-        { type: 'subagent_invocation', agent: 'agent-a' },
-        { type: 'subagent_invocation', agent: 'agent-a' },
-        { type: 'subagent_invocation', agent: 'agent-a' },
-        { type: 'subagent_invocation', agent: 'agent-b' },
-        { type: 'subagent_invocation', agent: 'agent-b' },
-        { type: 'subagent_invocation', agent: 'agent-c' },
-        { type: 'subagent_invocation', agent: 'agent-d' }
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'subagent', name: 'agent-b' },
+        { type: 'subagent', name: 'agent-b' },
+        { type: 'subagent', name: 'agent-c' },
+        { type: 'subagent', name: 'agent-d' }
       ];
 
       const analyzer = new SubagentAnalyzer();
@@ -146,8 +146,8 @@ describe('SubagentAnalyzer', () => {
 
     it('should handle request for more agents than available', () => {
       const entries = [
-        { type: 'subagent_invocation', agent: 'agent-a' },
-        { type: 'subagent_invocation', agent: 'agent-b' }
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'subagent', name: 'agent-b' }
       ];
 
       const analyzer = new SubagentAnalyzer();
@@ -162,23 +162,23 @@ describe('SubagentAnalyzer', () => {
     it('should filter entries by time range', () => {
       const entries = [
         {
-          type: 'subagent_invocation',
-          agent: 'agent-a',
+          type: 'subagent',
+          name: 'agent-a',
           timestamp: '2025-01-01T09:00:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-b',
+          type: 'subagent',
+          name: 'agent-b',
           timestamp: '2025-01-01T10:00:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-c',
+          type: 'subagent',
+          name: 'agent-c',
           timestamp: '2025-01-01T11:00:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-d',
+          type: 'subagent',
+          name: 'agent-d',
           timestamp: '2025-01-01T12:00:00Z'
         }
       ];
@@ -199,27 +199,70 @@ describe('SubagentAnalyzer', () => {
     });
   });
 
+  describe('Task tool with subagent_type', () => {
+    it('should detect subagents from Task tool with subagent_type', () => {
+      const entries = [
+        { type: 'subagent', name: 'agent-a' },
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'code-reviewer' } },
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'test-writer' } },
+        { type: 'tool_use', name: 'Task', input: {} }, // Task without subagent_type
+        { type: 'tool_use', name: 'Bash' }, // Regular tool
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'code-reviewer' } }
+      ];
+
+      const analyzer = new SubagentAnalyzer();
+      const result = analyzer.analyze(entries);
+
+      expect(result.totalInvocations).toBe(4); // agent-a + 3 Task with subagent_type
+      expect(result.uniqueAgents).toBe(3);
+      expect(result.agentCounts).toEqual({
+        'agent-a': 1,
+        'code-reviewer': 2,
+        'test-writer': 1
+      });
+    });
+
+    it('should handle mixed Task tool invocations', () => {
+      const entries = [
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'agent-a' } },
+        { type: 'tool_use', name: 'Task', input: { command: 'some command' } }, // Task for general command
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'agent-b' } },
+        { type: 'subagent', name: 'agent-c' }
+      ];
+
+      const analyzer = new SubagentAnalyzer();
+      const result = analyzer.analyze(entries);
+
+      expect(result.totalInvocations).toBe(3); // Two Task with subagent_type + one direct subagent
+      expect(result.agentCounts).toEqual({
+        'agent-a': 1,
+        'agent-b': 1,
+        'agent-c': 1
+      });
+    });
+  });
+
   describe('groupBySession', () => {
     it('should group invocations by session', () => {
       const entries = [
         {
-          type: 'subagent_invocation',
-          agent: 'agent-a',
+          type: 'subagent',
+          name: 'agent-a',
           sessionId: 'session-1'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-b',
+          type: 'subagent',
+          name: 'agent-b',
           sessionId: 'session-1'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-a',
+          type: 'subagent',
+          name: 'agent-a',
           sessionId: 'session-2'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'agent-c',
+          type: 'subagent',
+          name: 'agent-c',
           sessionId: 'session-2'
         }
       ];

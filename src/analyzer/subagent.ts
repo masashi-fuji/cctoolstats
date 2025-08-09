@@ -22,6 +22,43 @@ export interface TopAgent {
 
 export class SubagentAnalyzer {
   /**
+   * Check if an entry should be counted as a subagent invocation
+   */
+  private isSubagentEntry(entry: any): boolean {
+    // New format: direct subagent
+    if (entry.type === 'subagent' && entry.name) {
+      return true;
+    }
+    // Task tool with subagent_type
+    if (entry.type === 'tool_use' && entry.name === 'Task' && entry.input?.subagent_type) {
+      return true;
+    }
+    // Old format: subagent_invocation (backward compatibility)
+    if (entry.type === 'subagent_invocation' && entry.agent) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get subagent name from entry
+   */
+  private getSubagentName(entry: any): string | null {
+    // New format: direct subagent
+    if (entry.type === 'subagent' && entry.name) {
+      return entry.name;
+    }
+    // Task tool with subagent_type
+    if (entry.type === 'tool_use' && entry.name === 'Task' && entry.input?.subagent_type) {
+      return entry.input.subagent_type;
+    }
+    // Old format: subagent_invocation
+    if (entry.type === 'subagent_invocation' && entry.agent) {
+      return entry.agent;
+    }
+    return null;
+  }
+  /**
    * Analyze subagent invocations from log entries
    */
   analyze(entries: any[]): SubagentAnalysisResult {
@@ -30,18 +67,24 @@ export class SubagentAnalyzer {
     let totalInvocations = 0;
     
     entries.forEach((entry, index) => {
-      if (entry.type === 'subagent_invocation' && entry.agent) {
-        const agent = entry.agent;
-        agentCounts[agent] = (agentCounts[agent] || 0) + 1;
-        totalInvocations++;
-        
-        if (entry.timestamp) {
-          timeline.push({
-            agent,
-            timestamp: entry.timestamp,
-            index: timeline.length
-          });
-        }
+      if (!this.isSubagentEntry(entry)) {
+        return;
+      }
+      
+      const agent = this.getSubagentName(entry);
+      if (!agent) {
+        return;
+      }
+      
+      agentCounts[agent] = (agentCounts[agent] || 0) + 1;
+      totalInvocations++;
+      
+      if (entry.timestamp) {
+        timeline.push({
+          agent,
+          timestamp: entry.timestamp,
+          index: timeline.length
+        });
       }
     });
     
@@ -102,12 +145,14 @@ export class SubagentAnalyzer {
     const sessions: Record<string, any[]> = {};
     
     entries.forEach(entry => {
-      if (entry.type === 'subagent_invocation' && entry.sessionId) {
-        if (!sessions[entry.sessionId]) {
-          sessions[entry.sessionId] = [];
-        }
-        sessions[entry.sessionId].push(entry);
+      if (!this.isSubagentEntry(entry) || !entry.sessionId) {
+        return;
       }
+      
+      if (!sessions[entry.sessionId]) {
+        sessions[entry.sessionId] = [];
+      }
+      sessions[entry.sessionId].push(entry);
     });
     
     return sessions;

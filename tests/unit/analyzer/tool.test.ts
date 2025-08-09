@@ -6,28 +6,28 @@ describe('ToolAnalyzer', () => {
     it('should count tool invocations', () => {
       const entries = [
         {
-          type: 'tool_invocation',
-          tool: 'Bash',
+          type: 'tool_use',
+          name: 'Bash',
           timestamp: '2025-01-01T00:00:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Read',
+          type: 'tool_use',
+          name: 'Read',
           timestamp: '2025-01-01T00:01:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Bash',
+          type: 'tool_use',
+          name: 'Bash',
           timestamp: '2025-01-01T00:02:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Write',
+          type: 'tool_use',
+          name: 'Write',
           timestamp: '2025-01-01T00:03:00Z'
         },
         {
-          type: 'subagent_invocation',
-          agent: 'code-reviewer',
+          type: 'subagent',
+          name: 'code-reviewer',
           timestamp: '2025-01-01T00:04:00Z'
         }
       ];
@@ -55,7 +55,7 @@ describe('ToolAnalyzer', () => {
 
     it('should handle entries without tool invocations', () => {
       const entries = [
-        { type: 'subagent_invocation', agent: 'test-writer' },
+        { type: 'subagent', name: 'test-writer' },
         { type: 'message', content: 'Hello' },
         { type: 'error', message: 'Error occurred' }
       ];
@@ -70,12 +70,12 @@ describe('ToolAnalyzer', () => {
 
     it('should calculate tool percentages', () => {
       const entries = [
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Read' },
-        { type: 'tool_invocation', tool: 'Read' },
-        { type: 'tool_invocation', tool: 'Write' }
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Write' }
       ];
 
       const analyzer = new ToolAnalyzer();
@@ -91,18 +91,18 @@ describe('ToolAnalyzer', () => {
     it('should track tool timeline', () => {
       const entries = [
         {
-          type: 'tool_invocation',
-          tool: 'Bash',
+          type: 'tool_use',
+          name: 'Bash',
           timestamp: '2025-01-01T10:00:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Read',
+          type: 'tool_use',
+          name: 'Read',
           timestamp: '2025-01-01T10:05:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Bash',
+          type: 'tool_use',
+          name: 'Bash',
           timestamp: '2025-01-01T10:10:00Z'
         }
       ];
@@ -130,13 +130,13 @@ describe('ToolAnalyzer', () => {
 
     it('should track tool categories', () => {
       const entries = [
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Read' },
-        { type: 'tool_invocation', tool: 'Write' },
-        { type: 'tool_invocation', tool: 'Edit' },
-        { type: 'tool_invocation', tool: 'MultiEdit' },
-        { type: 'tool_invocation', tool: 'Grep' },
-        { type: 'tool_invocation', tool: 'Glob' }
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Write' },
+        { type: 'tool_use', name: 'Edit' },
+        { type: 'tool_use', name: 'MultiEdit' },
+        { type: 'tool_use', name: 'Grep' },
+        { type: 'tool_use', name: 'Glob' }
       ];
 
       const analyzer = new ToolAnalyzer();
@@ -154,16 +154,16 @@ describe('ToolAnalyzer', () => {
   describe('getTopTools', () => {
     it('should return top N tools by invocation count', () => {
       const entries = [
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Read' },
-        { type: 'tool_invocation', tool: 'Read' },
-        { type: 'tool_invocation', tool: 'Read' },
-        { type: 'tool_invocation', tool: 'Write' },
-        { type: 'tool_invocation', tool: 'Write' },
-        { type: 'tool_invocation', tool: 'Edit' }
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Write' },
+        { type: 'tool_use', name: 'Write' },
+        { type: 'tool_use', name: 'Edit' }
       ];
 
       const analyzer = new ToolAnalyzer();
@@ -178,8 +178,8 @@ describe('ToolAnalyzer', () => {
 
     it('should handle request for more tools than available', () => {
       const entries = [
-        { type: 'tool_invocation', tool: 'Bash' },
-        { type: 'tool_invocation', tool: 'Read' }
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Read' }
       ];
 
       const analyzer = new ToolAnalyzer();
@@ -194,23 +194,23 @@ describe('ToolAnalyzer', () => {
     it('should filter entries by time range', () => {
       const entries = [
         {
-          type: 'tool_invocation',
-          tool: 'Bash',
+          type: 'tool_use',
+          name: 'Bash',
           timestamp: '2025-01-01T09:00:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Read',
+          type: 'tool_use',
+          name: 'Read',
           timestamp: '2025-01-01T10:00:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Write',
+          type: 'tool_use',
+          name: 'Write',
           timestamp: '2025-01-01T11:00:00Z'
         },
         {
-          type: 'tool_invocation',
-          tool: 'Edit',
+          type: 'tool_use',
+          name: 'Edit',
           timestamp: '2025-01-01T12:00:00Z'
         }
       ];
@@ -231,14 +231,39 @@ describe('ToolAnalyzer', () => {
     });
   });
 
+  describe('Task tool with subagent_type', () => {
+    it('should exclude Task tool invocations with subagent_type from tool statistics', () => {
+      const entries = [
+        { type: 'tool_use', name: 'Bash' },
+        { type: 'tool_use', name: 'Read' },
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'code-reviewer' } },
+        { type: 'tool_use', name: 'Task', input: { subagent_type: 'test-writer' } },
+        { type: 'tool_use', name: 'Task', input: {} }, // Task without subagent_type
+        { type: 'tool_use', name: 'Write' }
+      ];
+
+      const analyzer = new ToolAnalyzer();
+      const result = analyzer.analyze(entries);
+
+      expect(result.totalInvocations).toBe(4); // Bash, Read, Task (without subagent), Write
+      expect(result.uniqueTools).toBe(4);
+      expect(result.toolCounts).toEqual({
+        'Bash': 1,
+        'Read': 1,
+        'Task': 1, // Only Task without subagent_type
+        'Write': 1
+      });
+    });
+  });
+
   describe('getToolStatistics', () => {
     it('should calculate tool usage statistics', () => {
       const entries = [
-        { type: 'tool_invocation', tool: 'Bash', duration: 100 },
-        { type: 'tool_invocation', tool: 'Bash', duration: 200 },
-        { type: 'tool_invocation', tool: 'Bash', duration: 300 },
-        { type: 'tool_invocation', tool: 'Read', duration: 50 },
-        { type: 'tool_invocation', tool: 'Read', duration: 150 }
+        { type: 'tool_use', name: 'Bash', duration: 100 },
+        { type: 'tool_use', name: 'Bash', duration: 200 },
+        { type: 'tool_use', name: 'Bash', duration: 300 },
+        { type: 'tool_use', name: 'Read', duration: 50 },
+        { type: 'tool_use', name: 'Read', duration: 150 }
       ];
 
       const analyzer = new ToolAnalyzer();

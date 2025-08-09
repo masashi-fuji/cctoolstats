@@ -30,6 +30,37 @@ export interface ToolStatistics {
 
 export class ToolAnalyzer {
   /**
+   * Check if an entry should be counted as a tool invocation
+   */
+  private isToolEntry(entry: any): boolean {
+    // New format: tool_use
+    if (entry.type === 'tool_use' && entry.name) {
+      // Skip Task tools that are subagent invocations
+      if (entry.name === 'Task' && entry.input?.subagent_type) {
+        return false;
+      }
+      return true;
+    }
+    // Old format: tool_invocation (backward compatibility)
+    if (entry.type === 'tool_invocation' && entry.tool) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get tool name from entry
+   */
+  private getToolName(entry: any): string | null {
+    if (entry.type === 'tool_use' && entry.name) {
+      return entry.name;
+    }
+    if (entry.type === 'tool_invocation' && entry.tool) {
+      return entry.tool;
+    }
+    return null;
+  }
+  /**
    * Analyze tool invocations from log entries
    */
   analyze(entries: any[]): ToolAnalysisResult {
@@ -38,18 +69,24 @@ export class ToolAnalyzer {
     let totalInvocations = 0;
     
     entries.forEach((entry, index) => {
-      if (entry.type === 'tool_invocation' && entry.tool) {
-        const tool = entry.tool;
-        toolCounts[tool] = (toolCounts[tool] || 0) + 1;
-        totalInvocations++;
-        
-        if (entry.timestamp) {
-          timeline.push({
-            tool,
-            timestamp: entry.timestamp,
-            index: timeline.length
-          });
-        }
+      if (!this.isToolEntry(entry)) {
+        return;
+      }
+      
+      const tool = this.getToolName(entry);
+      if (!tool) {
+        return;
+      }
+      
+      toolCounts[tool] = (toolCounts[tool] || 0) + 1;
+      totalInvocations++;
+      
+      if (entry.timestamp) {
+        timeline.push({
+          tool,
+          timestamp: entry.timestamp,
+          index: timeline.length
+        });
       }
     });
     
@@ -140,12 +177,19 @@ export class ToolAnalyzer {
     const stats: Record<string, { durations: number[] }> = {};
     
     entries.forEach(entry => {
-      if (entry.type === 'tool_invocation' && entry.tool && typeof entry.duration === 'number') {
-        if (!stats[entry.tool]) {
-          stats[entry.tool] = { durations: [] };
-        }
-        stats[entry.tool].durations.push(entry.duration);
+      if (!this.isToolEntry(entry) || typeof entry.duration !== 'number') {
+        return;
       }
+      
+      const tool = this.getToolName(entry);
+      if (!tool) {
+        return;
+      }
+      
+      if (!stats[tool]) {
+        stats[tool] = { durations: [] };
+      }
+      stats[tool].durations.push(entry.duration);
     });
     
     const result: Record<string, ToolStatistics> = {};
