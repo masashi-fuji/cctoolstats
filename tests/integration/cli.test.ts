@@ -6,10 +6,18 @@ import * as fs from 'fs';
 
 const execAsync = promisify(exec);
 
-describe('CLI Integration Tests', () => {
+describe.concurrent('CLI Integration Tests', () => {
   const fixturePath = path.join(__dirname, '../fixtures/sample-log.jsonl');
   const cliPath = path.join(__dirname, '../../src/cli.ts');
   const tempOutputPath = path.join(__dirname, '../temp-output.txt');
+  
+  // Cache for compiled CLI command
+  let cliCommand: string;
+  
+  beforeAll(() => {
+    // Pre-build the CLI command once
+    cliCommand = `npx tsx ${cliPath}`;
+  });
   
   afterAll(() => {
     // Clean up temp files
@@ -18,11 +26,10 @@ describe('CLI Integration Tests', () => {
     }
   });
 
-  describe('Processing JSONL files', () => {
+  describe.concurrent('Processing JSONL files', () => {
     it('should analyze a single JSONL file and output table format', async () => {
       // Run the CLI with the sample log file
-      const command = `npx tsx ${cliPath} ${fixturePath}`;
-      const { stdout, stderr } = await execAsync(command);
+      const { stdout, stderr } = await execAsync(`${cliCommand} ${fixturePath}`);
       
       // Check that the output contains expected information
       expect(stdout).toContain('Tool Usage Statistics');
@@ -35,8 +42,7 @@ describe('CLI Integration Tests', () => {
     }, 10000);
 
     it('should output JSON format when specified', async () => {
-      const command = `npx tsx ${cliPath} ${fixturePath} --format json`;
-      const { stdout, stderr } = await execAsync(command);
+      const { stdout, stderr } = await execAsync(`${cliCommand} ${fixturePath} --format json`);
       
       // Parse the JSON output
       const result = JSON.parse(stdout);
@@ -51,8 +57,7 @@ describe('CLI Integration Tests', () => {
     }, 10000);
 
     it('should output CSV format when specified', async () => {
-      const command = `npx tsx ${cliPath} ${fixturePath} --format csv`;
-      const { stdout, stderr } = await execAsync(command);
+      const { stdout, stderr } = await execAsync(`${cliCommand} ${fixturePath} --format csv`);
       
       // Check CSV format
       expect(stdout).toContain('Type,Name,Count,Percentage');
@@ -62,16 +67,19 @@ describe('CLI Integration Tests', () => {
     }, 10000);
 
     it('should save output to file when --output is specified', async () => {
-      const command = `npx tsx ${cliPath} ${fixturePath} --output ${tempOutputPath}`;
-      const { stdout, stderr } = await execAsync(command);
+      const uniqueTempPath = `${tempOutputPath}.${Date.now()}`;
+      const { stdout, stderr } = await execAsync(`${cliCommand} ${fixturePath} --output ${uniqueTempPath}`);
       
       // Check that file was created
-      expect(fs.existsSync(tempOutputPath)).toBe(true);
+      expect(fs.existsSync(uniqueTempPath)).toBe(true);
       
       // Read the file content
-      const fileContent = fs.readFileSync(tempOutputPath, 'utf-8');
+      const fileContent = fs.readFileSync(uniqueTempPath, 'utf-8');
       expect(fileContent).toContain('Tool Usage Statistics');
       expect(fileContent).toContain('Bash');
+      
+      // Clean up
+      fs.unlinkSync(uniqueTempPath);
       
       // stdout should indicate success
       expect(stdout).toContain('Output saved to');
@@ -79,8 +87,7 @@ describe('CLI Integration Tests', () => {
     }, 10000);
 
     it('should show help when --help is passed', async () => {
-      const command = `npx tsx ${cliPath} --help`;
-      const { stdout, stderr } = await execAsync(command);
+      const { stdout, stderr } = await execAsync(`${cliCommand} --help`);
       
       expect(stdout).toContain('Usage:');
       expect(stdout).toContain('Options:');
@@ -90,15 +97,14 @@ describe('CLI Integration Tests', () => {
     }, 10000);
 
     it('should show version when --version is passed', async () => {
-      const command = `npx tsx ${cliPath} --version`;
-      const { stdout, stderr } = await execAsync(command);
+      const { stdout, stderr } = await execAsync(`${cliCommand} --version`);
       
       expect(stdout).toMatch(/\d+\.\d+\.\d+/);
       expect(stderr).toBe('');
     }, 10000);
 
     it('should handle invalid format gracefully', async () => {
-      const command = `npx tsx ${cliPath} ${fixturePath} --format invalid`;
+      const command = `${cliCommand} ${fixturePath} --format invalid`;
       
       try {
         await execAsync(command);
@@ -111,7 +117,7 @@ describe('CLI Integration Tests', () => {
     }, 10000);
 
     it('should handle non-existent file gracefully', async () => {
-      const command = `npx tsx ${cliPath} /non/existent/file.jsonl`;
+      const command = `${cliCommand} /non/existent/file.jsonl`;
       
       try {
         await execAsync(command);
@@ -127,8 +133,7 @@ describe('CLI Integration Tests', () => {
   describe('End-to-end workflow', () => {
     it('should complete full analysis workflow', async () => {
       // Step 1: Analyze with table format
-      const tableCommand = `npx tsx ${cliPath} ${fixturePath}`;
-      const { stdout: tableOutput } = await execAsync(tableCommand);
+      const { stdout: tableOutput } = await execAsync(`${cliCommand} ${fixturePath}`);
       
       expect(tableOutput).toContain('Tool Usage Statistics');
       expect(tableOutput).toContain('Total: 7');  // 7 tool invocations
@@ -136,21 +141,23 @@ describe('CLI Integration Tests', () => {
       expect(tableOutput).toContain('Total: 3');  // 3 subagent invocations
       
       // Step 2: Analyze with JSON format for programmatic access
-      const jsonCommand = `npx tsx ${cliPath} ${fixturePath} --format json`;
-      const { stdout: jsonOutput } = await execAsync(jsonCommand);
+      const { stdout: jsonOutput } = await execAsync(`${cliCommand} ${fixturePath} --format json`);
       const jsonData = JSON.parse(jsonOutput);
       
       expect(jsonData.tools.uniqueTools).toBe(5);  // Bash, Read, Write, Edit, Grep
       expect(jsonData.subagents.uniqueAgents).toBe(2);  // code-reviewer, test-writer
       
       // Step 3: Save CSV for spreadsheet analysis
-      const csvCommand = `npx tsx ${cliPath} ${fixturePath} --format csv --output ${tempOutputPath}`;
-      const { stdout: csvStatus } = await execAsync(csvCommand);
+      const uniqueCsvPath = `${tempOutputPath}.csv.${Date.now()}`;
+      const { stdout: csvStatus } = await execAsync(`${cliCommand} ${fixturePath} --format csv --output ${uniqueCsvPath}`);
       
       expect(csvStatus).toContain('Output saved to');
-      const csvContent = fs.readFileSync(tempOutputPath, 'utf-8');
+      const csvContent = fs.readFileSync(uniqueCsvPath, 'utf-8');
       const csvLines = csvContent.split('\n');
       expect(csvLines.length).toBeGreaterThan(5);  // Header + data rows
+      
+      // Clean up
+      fs.unlinkSync(uniqueCsvPath);
     }, 15000);
   });
 });
