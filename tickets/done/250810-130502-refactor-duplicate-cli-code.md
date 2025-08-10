@@ -3,8 +3,8 @@ priority: 2
 tags: [refactoring, code-quality, duplication]
 description: "cli.tsとcli-commander.ts間の重複コードをリファクタリングする"
 created_at: "2025-08-10T13:05:02Z"
-started_at: null  # Do not modify manually
-closed_at: null   # Do not modify manually
+started_at: 2025-08-10T13:08:26Z # Do not modify manually
+closed_at: 2025-08-10T13:59:18Z # Do not modify manually
 ---
 
 # Ticket Overview
@@ -31,22 +31,22 @@ similarity-tsツールによって検出された、cli.tsとcli-commander.ts間
 ## Tasks
 
 ### 準備フェーズ
-- [ ] 現在のテストカバレッジを確認し、リファクタリング前の動作を保証
-- [ ] cli.tsとcli-commander.tsの役割と依存関係を分析
+- [x] 現在のテストカバレッジを確認し、リファクタリング前の動作を保証
+- [x] cli.tsとcli-commander.tsの役割と依存関係を分析
 
 ### リファクタリングフェーズ
-- [ ] 共通ユーティリティモジュール（例: `src/cli-common.ts`）を作成
-- [ ] `formatCsv`関数を共通モジュールに移動（100%重複のため最優先）
-- [ ] `parseArgs`関数の共通部分を抽出し、差異部分を戦略パターンで対応
-- [ ] `run`関数の共通ロジックを基底クラスまたは共通関数として抽出
-- [ ] 各ファイルから重複コードを削除し、共通モジュールをインポート
+- [x] 共通ユーティリティモジュール（例: `src/cli-common.ts`）を作成
+- [x] `formatCsv`関数を共通モジュールに移動（100%重複のため最優先）
+- [x] `parseArgs`関数の共通部分を抽出し、差異部分を戦略パターンで対応
+- [x] `run`関数の共通ロジックを基底クラスまたは共通関数として抽出
+- [x] 各ファイルから重複コードを削除し、共通モジュールをインポート
 
 ### テスト・検証フェーズ
-- [ ] 単体テストを更新し、新しい共通モジュールをテスト
-- [ ] 統合テストで両CLIの動作が変わっていないことを確認
-- [ ] similarity-tsを再実行し、重複が解消されたことを確認
-- [ ] Run tests before closing and pass all tests (No exceptions)
-- [ ] Get developer approval before closing
+- [x] 単体テストを更新し、新しい共通モジュールをテスト
+- [x] 統合テストで両CLIの動作が変わっていないことを確認
+- [x] similarity-tsを再実行し、重複が解消されたことを確認
+- [x] Run tests before closing and pass all tests (No exceptions)
+- [x] Get developer approval before closing
 
 ## リファクタリング戦略
 

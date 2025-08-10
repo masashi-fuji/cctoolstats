@@ -5,16 +5,13 @@
  */
 
 import { Command } from 'commander'
-import { readFileSync, writeFileSync, createReadStream } from 'fs'
+import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import * as path from 'path'
 import * as os from 'os'
 import { findClaudeLogFiles } from './utils/file-finder.js'
-import { StreamParser } from './parser/stream-parser.js'
-import { ToolAnalyzer } from './analyzer/tool.js'
-import { SubagentAnalyzer } from './analyzer/subagent.js'
-import { TableFormatter } from './formatters/table.js'
+import { processLogFiles, formatOutput, handleOutput } from './cli-common.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -97,75 +94,21 @@ export async function run(argv: string[]): Promise<void> {
   }
 
   try {
-    // Collect all entries from all files
-    const allEntries: any[] = []
-    
-    for (const filePath of logFiles) {
-      if (options.verbose) {
-        console.log(`Processing: ${filePath}`)
-      }
-      
-      const parser = new StreamParser()
-      const stream = createReadStream(filePath, { encoding: 'utf8' })
-      
-      // Parse raw entries and extract tool_use entries
-      for await (const rawEntry of parser.parseStream(stream)) {
-        // Extract tool_use entries from assistant messages
-        if (rawEntry.type === 'assistant' && rawEntry.message?.content) {
-          for (const content of rawEntry.message.content) {
-            if (content.type === 'tool_use') {
-              allEntries.push({
-                type: 'tool_use',
-                name: content.name,
-                input: content.input,
-                timestamp: rawEntry.timestamp,
-                id: content.id
-              })
-            }
-          }
-        }
-      }
-    }
-    
-    // Analyze the data
-    const toolAnalyzer = new ToolAnalyzer()
-    const subagentAnalyzer = new SubagentAnalyzer()
-    
-    const toolStats = toolAnalyzer.analyze(allEntries)
-    const subagentStats = subagentAnalyzer.analyze(allEntries)
+    // Process log files and analyze data
+    const { toolStats, subagentStats } = await processLogFiles(logFiles, {
+      verbose: options.verbose
+    })
     
     // Format output based on requested format
-    let output: string
-    
-    switch (options.format) {
-      case 'json':
-        output = formatJson(toolStats, subagentStats)
-        break
-      case 'csv':
-        output = formatCsv(toolStats, subagentStats)
-        break
-      case 'table':
-      default:
-        // Determine if colors should be used
-        const useColors = options.color !== undefined 
-          ? options.color 
-          : process.stdout.isTTY  // Auto-detect based on TTY
-        
-        const formatter = new TableFormatter({
-          useColors: useColors,
-          useThousandSeparator: options.thousandSeparator
-        })
-        output = formatter.formatCombinedStats(toolStats, subagentStats)
-        break
-    }
+    const output = formatOutput(toolStats, subagentStats, {
+      format: options.format,
+      color: options.color,
+      thousandSeparator: options.thousandSeparator,
+      verbose: options.verbose
+    })
     
     // Output results
-    if (options.output) {
-      writeFileSync(options.output, output)
-      console.log(`Output saved to ${options.output}`)
-    } else {
-      console.log(output)
-    }
+    handleOutput(output, options.output)
     
   } catch (error) {
     console.error(`Error: ${(error as Error).message}`)
@@ -173,39 +116,6 @@ export async function run(argv: string[]): Promise<void> {
   }
 }
 
-function formatJson(toolStats: any, subagentStats: any): string {
-  return JSON.stringify({
-    tools: toolStats,
-    subagents: subagentStats
-  }, null, 2)
-}
-
-function formatCsv(toolStats: any, subagentStats: any): string {
-  const lines: string[] = []
-  
-  // Header
-  lines.push('Type,Name,Count,Percentage')
-  
-  // Tool data
-  const sortedTools = Object.entries(toolStats.toolCounts)
-    .sort((a, b) => (b[1] as number) - (a[1] as number))
-  
-  for (const [tool, count] of sortedTools) {
-    const percentage = toolStats.toolPercentages[tool].toFixed(2)
-    lines.push(`Tool,${tool},${count},${percentage}`)
-  }
-  
-  // Subagent data
-  const sortedAgents = Object.entries(subagentStats.agentCounts)
-    .sort((a, b) => (b[1] as number) - (a[1] as number))
-  
-  for (const [agent, count] of sortedAgents) {
-    const percentage = subagentStats.agentPercentages[agent].toFixed(2)
-    lines.push(`Subagent,${agent},${count},${percentage}`)
-  }
-  
-  return lines.join('\n')
-}
 
 // For backward compatibility, export parseArgs function that converts to Commander options
 export interface CliArgs {
