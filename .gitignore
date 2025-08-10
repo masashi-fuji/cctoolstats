@@ -41,3 +41,6 @@ Thumbs.db
 
 # Package manager
 .pnpm-debug.log*
+
+# Language Server Cache
+.lsmcp/
