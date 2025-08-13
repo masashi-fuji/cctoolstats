@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/masashi-fuji/cctoolstats.git"
+    "url": "git+https://github.com/masashi-fuji/cctoolstats.git"
   },
   "keywords": [
     "claude",
@@ -30,7 +30,7 @@
     "tools",
     "analysis"
   ],
-  "author": "Masashi Fuji",
+  "author": "masashi-fuji",
   "license": "MIT",
   "type": "module",
   "engines": {

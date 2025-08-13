@@ -212,6 +212,16 @@ cctoolstats/
 4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
 5. プルリクエストを作成
 
+## サポート
+
+- 🐛 **バグ報告**: [GitHub Issues](https://github.com/masashi-fuji/cctoolstats/issues)
+- 💡 **機能要望**: [GitHub Issues](https://github.com/masashi-fuji/cctoolstats/issues)
+- 💬 **質問・ディスカッション**: [GitHub Discussions](https://github.com/masashi-fuji/cctoolstats/discussions)
+
+## 作者
+
+- GitHub: [@masashi-fuji](https://github.com/masashi-fuji)
+
 ## ライセンス
 
 MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照してください。
