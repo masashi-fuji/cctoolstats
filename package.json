@@ -6,6 +6,10 @@
   "bin": {
     "cctoolstats": "./bin/cctoolstats.js"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "directories": {
     "doc": "docs"
   },
@@ -16,7 +20,8 @@
     "test:run": "vitest run",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm run test:run && npm run build"
   },
   "repository": {
     "type": "git",
@@ -28,7 +33,10 @@
     "stats",
     "cli",
     "tools",
-    "analysis"
+    "analysis",
+    "subagent",
+    "transcript",
+    "usage"
   ],
   "author": "masashi-fuji",
   "license": "MIT",
