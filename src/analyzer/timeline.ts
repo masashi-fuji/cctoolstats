@@ -26,7 +26,9 @@ export function analyzeTimeline(entries: LogEntry[]): TimelineEvent[] {
       }
 
       if (entry.type === 'tool' || entry.type === 'subagent') {
-        event.name = entry.content?.name
+        if (typeof entry.content !== 'string' && entry.content?.name) {
+          event.name = entry.content.name
+        }
       }
 
       return event
